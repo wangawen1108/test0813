@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" type="text/css" href="bootstrap-3.4.1-dist/css/bootstrap.css">
+    <script src="jquery/jquery-1.11.1.js"></script>
+    <script src="jquery/jquery-1.11.1.min.js"></script>
+    <script src="bootstrap-3.4.1-dist/js/bootstrap.js"></script>
+</head>
+<style>
+    /* div {
+        border: 1px solid black;
+    } */
+</style>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <button class="btn" data-toggle="modal" data-target=".add">
+                <span class="glyphicon glyphicon-user"> </span>
+                添加错题
+            </button>
+            <div class="modal modal-dialog modal-content modal-lg add">
+                <h4>请详细填写重点信息:</h4>
+                <div class="form-group">
+                    <label for="wq-content">易错内容</label>
+                    <input name="wq-content" id="wq-content" type="text" class="form-control"
+                        placeholder="易错内容"></input>
+                </div>
+                <div class="form-group">
+                    <label for="wq-where">错在哪</label>
+                    <textarea name="wq-where" id="wq-where" type="text" row="2" class="form-control"
+                        placeholder="请详细描述错误位置"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="wq-idea">你的想法</label>
+                    <textarea name="wq-idea" id="wq-idea" type="text" row="2" class="form-control"
+                        placeholder="你的感悟"></textarea>
+                </div>
+                <div class="text-center">
+                    <button type="button" class="btn btn-success" data-dismiss="modal" id="wq-save-question">提交</button>
+                </div>
+
+                <!-- <label for="wq-content">易错内容</label>
+                <input type="text" class="form-control" id="wq-content" name="wq-content" placeholder="易错内容">
+                错在哪:
+                <input type="text" class="form-control" placeholder="请详细描述错误位置">
+                你的想法:
+                <input type="text" class="form-control" placeholder="你的感悟">
+                <input class="btn btn-default" id="wq-save-question" type="submit" value="Submit">
+                <button class="btn" data-dismiss="modal">关闭</button> -->
+
+
+                <!-- data-dismiss="modal"关闭当前 -->
+            </div>
+
+            <!--  -->
+            <!-- 组件 -->
+            <!-- 表格 -->
+            <!-- https://v3.bootcss.com/css/#tables -->
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th class="col-md-1">#</th>
+                        <th class="col-md-3">易错内容</th>
+                        <th class="col-md-2">错在哪</th>
+                        <th class="col-md-2">你的想法</th>
+                        <th class="col-md-2">删除</th>
+                        <th class="col-md-2">操作</th>
+                        <!-- <td class="col-md-2">qq</td> -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- <tr class="text-center middle">
+                         <td>1</td>
+                        <td>闭包</td>
+                        <td>闭包使用不清晰</td>
+                        <td>闭包的原理略有模糊</td>
+                        <td>
+                            <button class="btn">删除</button>
+                        </td>
+                        <td>
+                            <button class="btn" data-toggle="modal" data-target=".wq-upt">
+                                <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+                            </button>
+                        </td>
+                    </tr>-->
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>
+<script src="public.js"></script>
+<script src="ajax.js"></script>
+<!-- <script src="jquery/jquery-1.11.1.js"></script> -->
+<script>
+    window.onload = function () {
+        //显示:页面加载显示 
+        //1.通过ajax请求服务器
+        //2.服务器操作数据
+        //3.服务器结果返回
+        var tbody = document.querySelector("tbody");
+        ajaxGet("show.php", function (res) {
+            // console.log(res);//string类型
+            var arr = JSON.parse(res);
+            for (var i = 0; i < arr.length; i++) {
+                var str = "";
+                var tr = document.createElement("tr");
+                str += `<td>${arr[i].wid}</td>
+                        <td>${arr[i].content}</td>
+                        <td>${arr[i].wwhere}</td>
+                        <td>${arr[i].idea}</td>
+                        <td>
+                            <button class="btn del">删除</button>
+                        </td>
+                        <td>
+                            <button class="btn upt" data-toggle="modal" data-target=".wq-upt"  
+                            content=${arr[i].content} where=${arr[i].wwhere} idea=${arr[i].idea} wid=${arr[i].wid}>
+                                <span class="glyphicon glyphicon-cog" aria-hidden="true" 
+                                content=${arr[i].content}  where=${arr[i].wwhere} idea=${arr[i].idea} wid=${arr[i].wid}></span>
+                            </button>
+                        </td>`;
+                tr.innerHTML = str;
+                tbody.appendChild(tr);
+            }
+        })
+        //添加:按钮单击事件
+        //请求ajax
+        //根据服务器返回的结果确定添加成功或失败
+        var sub = document.getElementById("wq-save-question");
+        sub.onclick = function () {
+            var url = "add.php";
+            var tcontent = $id("wq-content").value;
+            var twhere = $id("wq-where").value;
+            var tidea = $id("wq-idea").value;
+            var data = `content=${tcontent}&where=${twhere}&idea=${tidea}`;
+            ajaxGet(url, function (res) {
+                // alert(res);
+            }, data);
+        }
+
+        //修改功能 
+        //监听
+        tbody.addEventListener("click", function (e) {
+            var e = e || event;
+            var target = e.target || e.srcElement;
+            //后面的条件是鼠标点到图上也可以触发事件
+            if (target.className == "btn upt" || target.className == "glyphicon glyphicon-cog") {
+                //getAttribute("content")返回content属性值
+                //   alert(target.getAttribute("content"));
+                $id("wq-content").value = target.getAttribute("content");
+                $id("wq-where").value = target.getAttribute("where");
+                $id("wq-idea").value = target.getAttribute("idea");
+            }
+        })
+
+        //删除功能
+        //ajax是异步的 这里不能直接给button按钮写
+        //button是动态创建的 这里用委托 给tbody
+        tbody.onclick = function (e) {
+            var e = e || event;
+            var target = e.target || e.srcElement;
+            if (target.className == "btn del") {
+                var id = target.parentNode.parentNode.children[0].innerHTML;
+                var data = `id=${id}`;
+                if (confirm("确定要删吗？")) {
+                    ajaxGet("del.php", function (res) {
+                        switch (res) {
+                            case "1": location.reload(); break;
+                            case "0": alert("删除失败"); break;
+                        }
+                    }, data)
+                }
+            }
+        }
+
+    }
+</script>
